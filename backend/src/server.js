@@ -1,17 +1,28 @@
-import express from 'express';
-import { ENV } from './lib/env.js';
+import express from "express";
+import { ENV } from "./lib/env.js";
+import path from "path";
 
 import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
 
-console.log(ENV.PORT);
+const __dirname = path.resolve();
 
-app.get('/',(req,res) =>{
-    res.status(200).json({message : "Success from backend 123"});
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Success from root endpoint" });
 });
 
-app.listen(ENV.PORT, ()=>{
-    console.log('Server running at port',ENV.PORT);
+// make our app ready for deployment
+
+if (ENV.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  app.get("/{*any}", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+  });
+}
+
+app.listen(ENV.PORT, () => {
+  console.log("Server running at port", ENV.PORT);
 });
